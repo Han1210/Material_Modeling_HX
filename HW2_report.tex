@@ -1,0 +1,252 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{HW2 Report}
+\author{Han Xie }
+\date{September 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Carbon Dating}
+\subsection{analysis calculation}
+
+\[\Delta N = -\gamma N \Delta t\] 
+\[\frac{\Delta N}{\Delta t} = -\gamma N = - \frac{1}{\tau}N\]
+\[\frac{dN}{dt} = -\frac{1}{\tau}N\]
+\[\frac{1}{N}dN = -\frac{1}{\tau} dt\]
+
+With the integration, we are able to obtain as shown in class:
+\[N(\Delta t) = Ne^{-\frac{t}{\tau}}\]
+
+Now, we assume the t described in the equation to be the half-life:
+
+\[\Delta t = T_{\frac{1}{2}}\]
+\[N(\Delta t) = N_{\frac{1}{2}}\]
+
+Then, the equation would become:
+\[N_{\frac{1}{2}}= N_{o} e^{-\frac{T_{\frac{1}{2}}}{\tau}}\]
+
+By taking the natural logarithm:
+\[ln(N_{\frac{1}{2}})= ln(N_{o} e^{-\frac{T_{\frac{1}{2}}}{\tau}})\]
+
+\[ln(N_{\frac{1}{2}})= ln(N_{o})- (\frac{T_{\frac{1}{2}}}{\tau})\]
+
+\[ln(N_{\frac{1}{2}})- ln(N_{o})= - (\frac{T_{\frac{1}{2}}}{\tau})\]
+
+\[ln(N_{o}) - ln(N_{\frac{1}{2}})=(\frac{T_{\frac{1}{2}}}{\tau})\]
+
+\[ln(\frac{N_{o}}{N_{\frac{1}{2}}})=(\frac{T_{\frac{1}{2}}}{\tau})\]
+
+\[T_{\frac{1}{2}} = ln(\frac{N_{o}}{N_{\frac{1}{2}}}) \tau \]
+
+By definition, half-life is the time to takes for an element to decay to half of the original amount:
+\[N_{\frac{1}{2}} = \frac{1}{2} N_{o}\]
+
+Thus, the result is
+
+\[T_{\frac{1}{2}} = \tau ln2\]
+\[\tau = \frac{T_{\frac{1}{2}}}{ln2}\]
+
+\subsection{The activity of sample
+over a duration of 20,000 years}
+
+When the time-step is 10, the two solutions overlap super well. The percentage deviation from the exact result after 2 half-lives is 99.916\%.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{10.pdf}
+    \label{fig:10}
+\end{figure}
+
+\vspace{10cm}
+As the time-step goes to 100, there is a slight deviation but still in an acceptable range with the percentage deviation from the exact result after 2 half-lives to be 99.153\%.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{100.pdf}
+    \label{fig:100}
+\end{figure}
+
+\subsection{The unacceptable numeric plot with the time-step of 1000}
+ However, when the time-step increases to 1000, the accuracy have decrease a lot. The percentage deviation from the exact result after roughly 2 half-lives (11000) becomes 90.788\%. 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{1000.pdf}
+    \label{fig:1000}
+\end{figure}
+
+To compare the deviation from the exact result with the neglected second-order term, we first calculate the exact difference as 920731725074 ($9.2*10^{11}$) after roughly 2 half-lives (11000). Then, the second-order is 67090810225 ($6.7*10^{10}$) after roughly 2 half-lives (11000). The difference among those two is 853640914848 ($8.5*10^{11}$).  The difference is so much larger than second order, so that it is not only based on the neglected second-order term.
+
+\section{Golf}
+For the golf ball case, we have compared the golf ball movement under the ideal case, smooth ball with drag, dimpled golf ball with drag, and dimpled golf ball with drag and spin at the degrees of 60,45,15,9.
+
+\subsection{The movement at a degree of 9}
+
+\begin{verbatim}
+Ideal case 
+ x: 154.34408160807158m 
+ y: 1.179080109864946e-07m 
+ vmag: 69.99984652797234m/s 
+ vx: 69.13818384165964m/s 
+ vy:-10.94943144718275m/s 
+
+Smooth golf ball with drag case 
+ x: 59.58402501987439m 
+ y: 0.000424385702019448m 
+ vmag: 22.40323815620362m 
+ C: 0.5
+ vx: 21.231226620632274m/s 
+ vy:-7.1491241814067115m/s 
+
+Dimpled golf ball with drag case 
+ x: 108.04885039789706m 
+ y: 0.0007726225356127762m 
+ vmag: 40.47623841073451m 
+ C: 0.17294097166261288
+ vx: 39.442724977979154m/s 
+ vy:-9.084332391067635m/s 
+
+Dimpled golf ball with drag and spin case 
+ x: 206.75514519782678m 
+ y: 0.0005976906113371306m 
+ vmag: 19.97683063619006m 
+ C: 0.3504059341284492
+ vx: 12.31409821158462m/s 
+ vy:-15.730406065055972m/s 
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{The trajectory at 9.0.pdf}
+    \label{fig:9}
+\end{figure}
+
+\subsection{The movement at a degree of 15}
+
+\begin{verbatim}
+Ideal case 
+ x: 249.73529275810267m 
+ y: 0.0008316180479615279m 
+ vmag: 69.9996295622367m/s 
+ vx: 67.61480784023477m/s 
+ vy:-18.115901842814488m/s 
+
+Smooth golf ball with drag case 
+ x: 72.89255183647627m 
+ y: 9.389917843751362e-07m 
+ vmag: 18.627777618214793m 
+ C: 0.5
+ vx: 15.46450426928769m/s 
+ vy:-10.384517488165496m/s 
+
+Dimpled golf ball with drag case 
+ x: 144.5773311231671m 
+ y: 0.0010365427341075158m 
+ vmag: 30.979792169514248m 
+ C: 0.2259537430624977
+ vx: 27.880093651436383m/s 
+ vy:-13.50635581327672m/s 
+
+Dimpled golf ball with drag and spin case 
+ x: 200.97766235850398m 
+ y: 0.0005332014370232146m 
+ vmag: 21.79182303515099m 
+ C: 0.32122140440975266
+ vx: 12.45855158539541m/s 
+ vy:-17.879513998186138m/s 
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{The trajectory at 15.0.pdf}
+    \label{fig:15}
+\end{figure}
+
+\subsection{The movement at a degree of 30}
+
+\begin{verbatim}
+Ideal case 
+ x: 432.5606366315742m 
+ y: 0.002657936521720552m 
+ vmag: 69.99913701595649m/s 
+ vx: 60.62177826491071m/s 
+ vy:-34.9982739999939m/s 
+
+Smooth golf ball with drag case 
+ x: 85.0906108958497m 
+ y: 2.5276724820343576e-05m 
+ vmag: 18.180388751779294m 
+ C: 0.5
+ vx: 8.833797891766876m/s 
+ vy:-15.890189858264677m/s 
+
+Dimpled golf ball with drag case 
+ x: 174.56488443962473m 
+ y: 0.0020339220644852475m 
+ vmag: 24.469177136122475m 
+ C: 0.2860741888073666
+ vx: 12.645475640399775m/s 
+ vy:-20.948526586305487m/s 
+
+Dimpled golf ball with drag and spin case 
+ x: 175.40711542762543m 
+ y: 0.00033524425885148815m 
+ vmag: 24.696359851652492m 
+ C: 0.2834425819047018
+ vx: 13.772333098083424m/s 
+ vy:-20.499749449675846m/s 
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{The trajectory at 30.0.pdf}
+    \label{fig:30}
+\end{figure}
+
+\begin{The movement at a degree of 45}
+
+\begin{verbatim}
+Ideal case 
+ x: 499.48396677358414m 
+ y: 0.0013994641921748147m 
+ vmag: 69.99911020649961m/s 
+ vx: 49.49747468305833m/s 
+ vy:-49.496216317024455m/s 
+
+Smooth golf ball with drag case 
+ x: 80.82370461930786m 
+ y: 0.0013555920377257874m 
+ vmag: 19.618556306181006m 
+ C: 0.5
+ vx: 5.388012529664582m/s 
+ vy:-18.86436954593298m/s 
+
+Dimpled golf ball with drag case 
+ x: 157.86897099780845m 
+ y: 0.0006057669157608077m 
+ vmag: 25.909867854959206m 
+ C: 0.27016733698470735
+ vx: 6.109770724587431m/s 
+ vy:-25.179445114057824m/s 
+
+Dimpled golf ball with drag and spin case 
+ x: 132.5348066303513m 
+ y: 0.0013451807598840373m 
+ vmag: 26.249799180686004m 
+ C: 0.2666687067514954
+ vx: 14.619739919529595m/s 
+ vy:-21.80183623029174m/s 
+\end{verbatim}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{The trajectory at 45.0.pdf}
+    \label{fig:45}
+\end{figure}
+
+The value of x,y,vmag,vx, and vy does make sense. At the end, the x would be the largest, y is nearly 0. vx value is positive, while vy value is negative due to the x component goes to the positive direction, while y direction goes to negative. With the increment of angle, the spinning force would affect more due to the x-component gets larger in value but opposite direction. The ideal case have greatest distance compare to the dimpled and smooth golf ball with drag since drag force is the opposite direction as the velocity. The dimpled golf is greater than the smooth ball since the drag force become smaller when the velocity greater than 14 in dimpled case. 
+\section{Contribution}
+Our group discusses questions with each other and compares our results and codes to try to figure out the problems of each other.
+\end{document}
+
