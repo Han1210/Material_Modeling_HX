@@ -1,18 +1,10 @@
-FXN = cos,sin,sinc #set flag
-TXT = test.txt
-FMT = pdf
-.PHONY: plot write read #set phony
+WIDTH = 10 #set flag
+THETA = 45
 
-plot: function_figure.pdf  #check if pdf exist
-function_figure.pdf: trignometry.py #if not run to get the pdf
-	python3 trignometry.py --function=$(FXN) --print=$(FMT)
+.PHONY: carbon golf #set phony
 
-write: test.txt  #check if the txt file exist
-test.txt: #if not, run to get the txt
-	python3 trignometry.py --function=$(FXN) --write=$(TXT)
+carbon: carbon.py #if not run to get the pdf
+	python3 carbon.py --plot=$(WIDTH)
 
-read: read_file_figure.pdf  #check if the pdf file exist
-read_file_figure.pdf: trignometry.py #if not run the python to get the pdf
-	python3 trignometry.py --function=$(FXN) --read=$(TXT) --print=$(FMT)
-
-
+golf: golf.py
+	python3 golf.py --plot=$(THETA)
