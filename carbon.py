@@ -5,12 +5,10 @@ import matplotlib.pyplot as plt
 
 time_step = 10 #by default
 
-splited_args = sys.argv[1]
-
-s = splited_args.split("=")
-if s[0] == '--plot':
-     is_plot = True
-     time_step = float(s[1])
+if len(sys.argv) > 1:
+    s = sys.argv[1].split("=")
+    if s[0] == '--plot':
+        degree = float(s[1])
 
 half_life = 5700
 mass = 10**(-9) #g
