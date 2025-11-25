@@ -1,0 +1,177 @@
+# Course: EN566 Materials Modeling 2025
+# Instructor: Dr. Corey Oses
+# Homework 5 Part 1 Question 1
+
+#########################################
+###############	variables ###############	
+
+variable			 tem equal 373 							 # desired temperature (K)
+variable	     pre equal 1                     # desired pressure (Atm)
+
+variable        dt equal 0.01
+variable        Tdamp equal 100.0*${dt}		     # units are time units, LAMMPS suggestion is 100 time steps (e.g. 50fs if time step is 0.5fs)
+variable        Pdamp equal 1000.0*${dt}		   # units are time units, LAMMPS suggestion is 1000 time steps
+
+
+# ----------------- Initialize Simulation ---------------------
+units		real 																			  #   style of units (A, fs, Kcal/mol)
+dimension 3              
+boundary	p p p 																		# periodic boundary conditions 
+atom_style	full 																		#  full: molecular + charge bio-molecules 																	
+																										#  atomic: coarse-grain liquids, solids, metals
+																										#  charge: atomic system with charges
+																										
+region box block -10 10 -10 10 -10 10
+create_box 2 box bond/types 1 angle/types 1 &
+           extra/bond/per/atom 2 extra/angle/per/atom 1 extra/special/per/atom 2
+           																						
+pair_style	lj/cut/coul/long 10.0 10.0
+bond_style	harmonic   			     #   Sets the bond type as harmonic
+angle_style	harmonic			     	 #   Sets the triplet bond type as harmonic
+dihedral_style	opls
+improper_style harmonic		    
+
+
+# ----------------- Build Bulk Water ---------------------
+
+molecule water water.data
+
+#region water_region block INF INF INF INF INF INF  units box
+
+#lattice         bcc 3.95     # sc 4.04
+#create_atoms 0 region water_region mol water 3453 units box
+create_atoms 0 random 400 827828 NULL mol water 3453 overlap 1 units box
+
+mass 1 15.9994   # O
+mass 2 1.008     # H
+
+set type 1 charge -0.8476                       # O
+set type 2 charge 0.4238                        # H
+
+# ----------------- Define Group ---------------------
+
+group watergroup type 1 2
+group Ogroup type 1
+
+kspace_style	pppm 0.00001
+# kspace_modify  order 7
+pair_modify	mix arithmetic tail yes 	
+special_bonds lj/coul 0.0 0.0 0.5
+
+neighbor	2.0 bin
+neigh_modify delay 2 every 1 check yes one 10000 page 200000
+
+# ----------------- Force Field ---------------------
+
+pair_coeff 1 1 0.1553 3.166
+pair_coeff 1 2 0.0    1.0
+pair_coeff 2 2 0.0    1.0
+
+bond_style zero
+bond_coeff 1 1.0
+
+angle_style zero
+angle_coeff 1 109.47
+
+write_data water_init.data
+
+#SHAKE Parameters to preserve bondlengths
+fix		RigidOHBonds watergroup shake 0.0001 10 0 b 1 a 1 
+
+# Energy minimization
+#minimize 1.0e-4 1.0e-6 1000 10000
+
+# ---------- Output Style ---------------------		      	    	      	     	      	    	      	    
+variable        Nevery equal 1                       # Specify the distance (in timesteps) between samples for computing ensemble aver$
+                                                     #  (Interval between samples in a block)
+variable        Nrepeat equal 1                      # Specify the number of samples per output  of thermodynamic averages
+                                                     #  (Samples per block output)
+variable        Nfreq equal ${Nevery}*${Nrepeat}     # Specify the dump interval (in timesteps)
+                                                     #  (Some people call these blocks)
+
+thermo          10                                  # Specify the interval between screen output of thermodynamic averages
+thermo_style    custom step temp press pe vol density		# Format for screen output of thermodynamics
+                                                    
+                                                     
+                                                
+# ---------- Equilibration Settings 1 ---------------------
+
+reset_timestep 0
+variable count1 loop 9
+label loop1
+
+# NVT equilibration (fixed volume, relax temperature)
+reset_timestep 0
+variable dt equal 10^(-1*(9-${count1})) 			# (fs)
+timestep	${dt}
+variable Tdamp equal 100.0*${dt}	
+velocity all create ${tem} 19563 mom yes rot yes dist gaussian		# Create initial velocity distribution
+fix nvt all nvt temp ${tem} ${tem} ${Tdamp} drag 0.1
+
+if "${dt} < 0.00001" then &
+  "run 100" &
+elif "${dt} == 0.00001" &
+  "run 500" &
+elif "${dt} == 0.0001" &
+  "run 500" &
+elif "${dt} == 0.001" &
+  "run 1000" &
+elif "${dt} == 0.01" &
+  "run 1000" &  
+elif "${dt} == 0.1" &
+  "run 1000" &   
+elif "${dt} == 1" &
+  "run 2000" 
+  
+write_data water_nvt_${count1}.data
+
+next count1
+jump water.in loop1
+write_data water_nvt_final.data 
+
+# ---------- Equilibration Settings 2 ---------------------
+
+
+# NPT equilibration (fixed pressure, volume adjusts for density)
+unfix nvt
+
+
+variable count2 loop 5
+label loop2
+
+reset_timestep 0
+variable dt equal 10^(-1*(5-${count2}))                         # (fs)
+timestep        ${dt}
+variable Tdamp equal 100.0
+variable Pdamp equal 1000.0
+fix npt all npt temp ${tem} ${tem} ${Tdamp} iso ${pre} ${pre} ${Pdamp}
+
+if "${dt} < 0.00001" then &
+  "run 100" &
+elif "${dt} == 0.00001" &
+  "run 500" &
+elif "${dt} == 0.0001" &
+  "run 500" &
+elif "${dt} == 0.001" &
+  "run 1000" &
+elif "${dt} == 0.01" &
+  "run 1000" &
+elif "${dt} == 0.1" &
+  "run 1000" &
+elif "${dt} == 1" &
+  "run 2000"
+
+write_data water_npt_${count2}.data
+next count2
+jump water.in loop2
+
+reset_timestep 0
+variable dt equal 1
+timestep        ${dt}
+variable Tdamp equal 100.0*${dt}
+variable Pdamp equal 1000.0*${dt}
+run 20000
+
+write_data water_npt_final.data 
+
+

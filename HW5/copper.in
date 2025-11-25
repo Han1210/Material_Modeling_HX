@@ -1,0 +1,119 @@
+#
+#Course: EN566 Materials Modeling 2025
+# Instructor: Dr. Corey Oses
+# Homework 5 Part 1 Question 2
+# LAMMPS Input for Cu Melting and Cooling with EAM
+
+#########################################
+###############	variables ###############	
+
+variable			 tem equal 293.15  							 # desired temperature (K)
+variable			 tem_s equal 1700
+variable	     pre equal 1                     # desired pressure (Atm)
+
+variable        dt equal 0.001
+variable        Tdamp equal 100.0*${dt}		     # units are time units, LAMMPS suggestion is 100 time steps (e.g. 50fs if time step is 0.5fs)
+variable        Pdamp equal 1000.0*${dt}		   # units are time units, LAMMPS suggestion is 1000 time steps
+
+
+# ----------------- Initialize Simulation ---------------------
+units		metal 																 # style of units (A, ps, eV)
+dimension 3              
+boundary	p p p
+atom_style atomic
+											
+lattice fcc 3.615 orient x 1 0 0 orient y 0 1 0 orient z 0 0 1
+region box block 0 15 0 15 0 15 units lattice
+create_box 1 box
+create_atoms 1 box
+mass 1 63.546  					# Cu atomic mass
+
+pair_style eam/alloy
+pair_coeff * * Cu1.eam.fs Cu  
+
+neighbor	2.0 bin
+neigh_modify every 1 delay 0
+
+write_data cu_init.data
+
+# Energy minimization
+minimize 1e-6 1e-8 1000 10000
+
+# Compute CNA for structure identification (FCC=1, HCP=2, BCC=3, ICO=4, unknown=5)
+compute 1 all cna/atom 3.5
+
+# ---------- Output Style ---------------------		      	    	      	     	      	    	      	    
+variable        Nevery equal 1                       # Specify the distance (in timesteps) between samples for computing ensemble aver$
+                                                     #  (Interval between samples in a block)
+variable        Nrepeat equal 1                      # Specify the number of samples per output  of thermodynamic averages
+                                                     #  (Samples per block output)
+variable        Nfreq equal ${Nevery}*${Nrepeat}     # Specify the dump interval (in timesteps)
+                                                     #  (Some people call these blocks)
+                                                     
+thermo          1                                   # Specify the interval between screen output of thermodynamic averages
+thermo_style    custom step temp press pe ke etotal vol density 
+
+
+# ---------- Equilibration Settings ---------------------
+
+reset_timestep 0
+timestep	${dt} 			# (ps)
+
+# Dump trajectory for visualization
+dump 1 all custom 500 dump.cu.lammpstrj id type x y z c_1
+
+# Equilibration at 300 K (NVT)
+velocity all create ${tem} 12345 mom yes rot yes dist gaussian
+fix eq1 all nvt temp ${tem} ${tem} ${Tdamp} drag 0.1
+run 10000
+
+unfix eq1
+fix	eq2 all npt temp ${tem} ${tem} ${Tdamp} iso ${pre} ${pre} ${Pdamp} 
+run 10000
+
+write_data cu_eq1.data
+
+# Heating to melt (ramp to 1700 K)
+unfix eq2
+fix heat all npt temp ${tem} 1700.0 ${Tdamp} iso ${pre} ${pre} ${Pdamp} 
+run 150000 
+
+# Hold at high temperature to ensure melt
+unfix heat
+fix hold all nvt temp 1700.0 1700.0 ${Tdamp} drag 0.1
+run 10000  
+unfix hold
+
+write_data cu_heated.data
+
+#Cooling back to 300 K
+#fix cool all nvt temp 2000.0 300.0 100.0
+#run 100000
+
+
+variable count3 loop 120
+label loop1
+
+timestep	${dt} 			# (fs)
+
+variable tem_s1 equal ${tem_s}-(${count3}-1)*10
+variable tem_e1 equal ${tem_s}-${count3}*10
+
+#Ensemble set-up: NVT ensemble, thermostatted by Nose-Hoover a chained thermostat, set at temperature $ext_temp
+fix	cool all nvt temp ${tem_s1} ${tem_e1} ${Tdamp} drag 0.1
+run		10000
+unfix cool
+
+fix	hold2 all nvt temp ${tem_e1} ${tem_e1} ${Tdamp} drag 0.1
+run		10000
+unfix hold2
+
+write_data cu_nvt_temp_${tem_e1}.data 
+next count3
+jump copper.in loop1
+
+write_data cu_final.data
+
+
+
+
